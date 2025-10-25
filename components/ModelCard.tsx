@@ -10,10 +10,11 @@ import Link from "next/link";
 
 interface ModelCardProps {
   model: Model;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
 }
 
-export function ModelCard({ model }: ModelCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export function ModelCard({ model, isExpanded, onToggleExpand }: ModelCardProps) {
   const [showApiKey, setShowApiKey] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -33,7 +34,7 @@ export function ModelCard({ model }: ModelCardProps) {
   return (
     <Card
       className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-purple-200 bg-white"
-      onClick={() => setIsExpanded(!isExpanded)}
+      onClick={onToggleExpand}
     >
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-3">
@@ -110,34 +111,36 @@ export function ModelCard({ model }: ModelCardProps) {
                   </div>
                 </div>
 
-                {model.metrics && (
-                  <div className="grid grid-cols-3 gap-3 pt-2">
-                    <div className="text-center p-3 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
-                      <div className="text-2xl font-bold text-green-700">
-                        {(model.metrics.accuracy * 100).toFixed(1)}%
+                <div className="space-y-3">
+                  {model.metrics && (
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center p-3 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
+                        <div className="text-2xl font-bold text-green-700">
+                          {(model.metrics.accuracy * 100).toFixed(1)}%
+                        </div>
+                        <div className="text-xs font-medium text-green-600">Accuracy</div>
                       </div>
-                      <div className="text-xs font-medium text-green-600">Accuracy</div>
-                    </div>
-                    <div className="text-center p-3 rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200">
-                      <div className="text-2xl font-bold text-blue-700">
-                        {(model.metrics.precision * 100).toFixed(1)}%
+                      <div className="text-center p-3 rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200">
+                        <div className="text-2xl font-bold text-blue-700">
+                          {(model.metrics.precision * 100).toFixed(1)}%
+                        </div>
+                        <div className="text-xs font-medium text-blue-600">Precision</div>
                       </div>
-                      <div className="text-xs font-medium text-blue-600">Precision</div>
-                    </div>
-                    <div className="text-center p-3 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
-                      <div className="text-2xl font-bold text-purple-700">
-                        {(model.metrics.recall * 100).toFixed(1)}%
+                      <div className="text-center p-3 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
+                        <div className="text-2xl font-bold text-purple-700">
+                          {(model.metrics.recall * 100).toFixed(1)}%
+                        </div>
+                        <div className="text-xs font-medium text-purple-600">Recall</div>
                       </div>
-                      <div className="text-xs font-medium text-purple-600">Recall</div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <Link href={`/models/${model.id}`}>
-                  <Button variant="outline" className="w-full border-2 hover:bg-purple-50 hover:border-purple-300">
-                    View Full Details →
-                  </Button>
-                </Link>
+                  <Link href={`/models/${model.id}`}>
+                    <Button variant="outline" className="w-full border-2 hover:bg-purple-50 hover:border-purple-300">
+                      View Full Details →
+                    </Button>
+                  </Link>
+                </div>
               </>
             )}
 

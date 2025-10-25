@@ -34,4 +34,6 @@ export interface Model {
   apiKey?: string;
   metrics?: ModelMetrics;
   errorMessage?: string;
+  inputSchema?: Record<string, any>;
+  outputSchema?: Record<string, any>;
 }

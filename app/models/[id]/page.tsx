@@ -128,6 +128,79 @@ function ModelDetailsContent() {
         </CardContent>
       </Card>
 
+      {(model.inputSchema || model.outputSchema) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>API Schema</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-sm text-muted-foreground">
+              This is the expected structure for API requests and responses.
+            </p>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {model.inputSchema && Object.keys(model.inputSchema).length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-base">Input Schema</h3>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleCopy(JSON.stringify(model.inputSchema, null, 2), "inputSchema")}
+                      className="gap-1 h-8"
+                    >
+                      {copiedField === "inputSchema" ? (
+                        <>
+                          <Copy className="h-3 w-3" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3 w-3" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <pre className="p-4 bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg overflow-x-auto text-sm font-mono">
+                    {JSON.stringify(model.inputSchema, null, 2)}
+                  </pre>
+                </div>
+              )}
+
+              {model.outputSchema && Object.keys(model.outputSchema).length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-base">Output Schema</h3>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleCopy(JSON.stringify(model.outputSchema, null, 2), "outputSchema")}
+                      className="gap-1 h-8"
+                    >
+                      {copiedField === "outputSchema" ? (
+                        <>
+                          <Copy className="h-3 w-3" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3 w-3" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <pre className="p-4 bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg overflow-x-auto text-sm font-mono">
+                    {JSON.stringify(model.outputSchema, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {model.status === "completed" && (
         <>
           <Card>
@@ -180,43 +253,110 @@ function ModelDetailsContent() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              {(model.inputSchema && model.inputSchema.properties && Object.keys(model.inputSchema.properties).length > 0) && (
+                <div className="space-y-2 pt-4 border-t">
+                  <h4 className="text-sm font-semibold">Example API Request & Response</h4>
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-4 space-y-3">
+                    <div>
+                      <div className="text-xs font-semibold text-green-700 mb-2">Request Body (JSON):</div>
+                      <pre className="bg-white/80 p-3 rounded border border-green-300 text-xs overflow-x-auto font-mono">
+{JSON.stringify(
+  Object.keys(model.inputSchema.properties).reduce((acc: any, key) => {
+    const prop = model.inputSchema?.properties?.[key];
+    const type = prop?.type || 'string';
+    
+    switch(type) {
+      case 'string': acc[key] = "example_value"; break;
+      case 'number': acc[key] = 42; break;
+      case 'integer': acc[key] = 42; break;
+      case 'boolean': acc[key] = true; break;
+      case 'array': acc[key] = []; break;
+      case 'object': acc[key] = {}; break;
+      default: acc[key] = "example_value";
+    }
+    return acc;
+  }, {}),
+  null,
+  2
+)}
+                      </pre>
+                    </div>
+                    {model.outputSchema && model.outputSchema.properties && Object.keys(model.outputSchema.properties).length > 0 && (
+                      <div>
+                        <div className="text-xs font-semibold text-green-700 mb-2">Response (JSON):</div>
+                        <pre className="bg-white/80 p-3 rounded border border-green-300 text-xs overflow-x-auto font-mono">
+{JSON.stringify(
+  Object.keys(model.outputSchema.properties).reduce((acc: any, key) => {
+    const prop = model.outputSchema?.properties?.[key];
+    const type = prop?.type || 'string';
+    
+    switch(type) {
+      case 'string': acc[key] = "result_value"; break;
+      case 'number': acc[key] = 0.95; break;
+      case 'integer': acc[key] = 1; break;
+      case 'boolean': acc[key] = true; break;
+      case 'array': acc[key] = []; break;
+      case 'object': acc[key] = {}; break;
+      default: acc[key] = "result_value";
+    }
+    return acc;
+  }, {}),
+  null,
+  2
+)}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2 pt-4 border-t">
                 <h4 className="text-sm font-semibold">Code Examples</h4>
                 <div className="space-y-3">
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Python</div>
-                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto font-mono">
 {`import requests
 
 response = requests.post(
     "${model.apiEndpoint}",
     headers={"Authorization": f"Bearer ${model.apiKey}"},
-    json={"data": "your input data"}
+    json=${model.inputSchema?.properties && Object.keys(model.inputSchema.properties).length > 0 
+      ? JSON.stringify(Object.keys(model.inputSchema.properties).reduce((acc: any, key) => { acc[key] = "..."; return acc; }, {}), null, 4).split('\n').map((line, i) => i === 0 ? line : '    ' + line).join('\n')
+      : '{"data": "your input data"}'
+    }
 )
 print(response.json())`}
                     </pre>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">JavaScript</div>
-                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto font-mono">
 {`const response = await fetch("${model.apiEndpoint}", {
   method: "POST",
   headers: {
     "Authorization": "Bearer ${model.apiKey}",
     "Content-Type": "application/json"
   },
-  body: JSON.stringify({ data: "your input data" })
+  body: JSON.stringify(${model.inputSchema?.properties && Object.keys(model.inputSchema.properties).length > 0 
+    ? JSON.stringify(Object.keys(model.inputSchema.properties).reduce((acc: any, key) => { acc[key] = "..."; return acc; }, {}))
+    : '{ data: "your input data" }'
+  })
 });
 const result = await response.json();`}
                     </pre>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">cURL</div>
-                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto font-mono">
 {`curl -X POST ${model.apiEndpoint} \\
   -H "Authorization: Bearer ${model.apiKey}" \\
   -H "Content-Type: application/json" \\
-  -d '{"data": "your input data"}'`}
+  -d '${model.inputSchema?.properties && Object.keys(model.inputSchema.properties).length > 0 
+    ? JSON.stringify(Object.keys(model.inputSchema.properties).reduce((acc: any, key) => { acc[key] = "..."; return acc; }, {}))
+    : '{"data": "your input data"}'
+  }'`}
                     </pre>
                   </div>
                 </div>

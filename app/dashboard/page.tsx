@@ -17,6 +17,7 @@ function DashboardContent() {
   const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedModelId, setExpandedModelId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -133,9 +134,14 @@ function DashboardContent() {
           </Button>
         </Link>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
         {models.map((model) => (
-          <ModelCard key={model.id} model={model} />
+          <ModelCard 
+            key={model.id} 
+            model={model}
+            isExpanded={expandedModelId === model.id}
+            onToggleExpand={() => setExpandedModelId(expandedModelId === model.id ? null : model.id)}
+          />
         ))}
       </div>
     </div>
